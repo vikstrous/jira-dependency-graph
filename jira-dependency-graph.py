@@ -26,7 +26,7 @@ class JiraSearch(object):
     def __init__(self, url, auth):
         self.url = url + '/rest/api/latest'
         self.auth = auth
-        self.fields = ','.join(['key', 'issuetype', 'issuelinks', 'subtasks'])
+        self.fields = ','.join(['key', 'issuetype', 'issuelinks', 'subtasks', 'status'])
 
     def get(self, uri, params={}):
         headers = {'Content-Type' : 'application/json'}
@@ -99,6 +99,11 @@ def build_graph_data(start_issue_key, jira, excludes):
         seen.append(issue_key)
         children = []
         fields = issue['fields']
+        if fields.has_key('status') and fields['status'].has_key('name'):
+            color = fields['status']['statusCategory']['colorName']
+            if color == 'blue-gray':
+                color = 'gray'
+            graph.append('"%s"[color="%s"]' % (issue_key, color))
         if fields['issuetype']['name'] == 'Epic':
             issues = jira.query('"Epic Link" = "%s"' % issue_key)
             for subtask in issues:
