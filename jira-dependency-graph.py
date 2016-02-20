@@ -26,7 +26,7 @@ class JiraSearch(object):
     def __init__(self, url, auth):
         self.url = url + '/rest/api/latest'
         self.auth = auth
-        self.fields = ','.join(['key', 'issuetype', 'issuelinks', 'subtasks', 'status'])
+        self.fields = ','.join(['key', 'issuetype', 'issuelinks', 'subtasks', 'status', 'fixVersions'])
 
     def get(self, uri, params={}):
         headers = {'Content-Type' : 'application/json'}
@@ -99,6 +99,8 @@ def build_graph_data(start_issue_key, jira, excludes):
         seen.append(issue_key)
         children = []
         fields = issue['fields']
+        if len(issue['fields']['fixVersions']) > 0 and issue['fields']['fixVersions'][0]['name'] != 'DTR 2.0.0':
+            return graph
         if fields.has_key('status') and fields['status'].has_key('name'):
             color = fields['status']['statusCategory']['colorName']
             if color == 'blue-gray':
